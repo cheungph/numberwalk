@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Chiikawa's Walking Math: Directed Numbers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ----------------------------------------------------
+       1. Mobile Reset & Strict Overflow Lockdown
+       ---------------------------------------------------- */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden; /* Prevents any mobile horizontal scrolling */
+      background-color: #FAF6F0;
+      color: #334155;
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 8px 30px;
+    }
+
+    /* ----------------------------------------------------
+       2. Typography & Header
+       ---------------------------------------------------- */
+    header {
+      text-align: center;
+      margin-bottom: 8px;
+      width: 100%;
+      max-width: 940px;
+      padding: 0 4px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .title-icon {
+      font-size: 1.4rem;
+    }
+
+    .title-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1E293B;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle-text {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #64748B;
+      margin-top: 1px;
+    }
+
+    /* ----------------------------------------------------
+       3. Nav Bar: Tabs & Sound
+       ---------------------------------------------------- */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 940px;
+      margin-bottom: 8px;
+      gap: 6px;
+    }
+
+    .mode-switch {
+      display: flex;
+      background: #EAE2D7;
+      padding: 3px;
+      border-radius: 999px;
+      gap: 3px;
+      flex: 1;
+      max-width: 440px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 6px;
+      min-height: 42px;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      color: #64748B;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #FFFFFF;
+      color: #1E293B;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .sound-btn {
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 999px;
+      padding: 0 12px;
+      height: 42px;
+      min-width: 42px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ----------------------------------------------------
+       4. Main Card Container (Strict Width Containment)
+       ---------------------------------------------------- */
+    .card-container {
+      background: #FFFFFF;
+      border-radius: 18px;
+      border: 1.5px solid #E4DBD0;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 940px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden; /* Prevents card blowout */
+    }
+
+    /* Equation Display */
+    .equation-box {
+      background: #F8FAFC;
+      border: 2px dashed #CBD5E1;
+      border-radius: 14px;
+      padding: 6px 10px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .eq-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: #94A3B8;
+      margin-bottom: 2px;
+    }
+
+    .equation-display {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 40px;
+      flex-wrap: wrap;
+    }
+
+    .num-a { color: #2563EB; }
+    .op-symbol { color: #7C3AED; }
+    .num-b { color: #059669; }
+    .equals { color: #94A3B8; }
+    .num-ans { color: #E11D48; }
+
+    /* ----------------------------------------------------
+       5. The Pure SVG Stage (No HTML Overlays)
+       ---------------------------------------------------- */
+    .stage-wrapper {
+      width: 100%;
+      background: linear-gradient(180deg, #FBFDFF 0%, #FFFFFF 100%);
+      border: 1.5px solid #E2E8F0;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    #stageSvg {
+      width: 100%;
+      height: auto;
+      display: block;
+      /* 960x270 gives ample room for bench on top and line on bottom */
+      aspect-ratio: 960 / 270;
+    }
+
+    /* SVG Character Keyframe Animations */
+    @keyframes legSwingFwd {
+      0%, 100% { transform: rotate(-18deg); }
+      50% { transform: rotate(20deg); }
+    }
+    @keyframes legSwingBwd {
+      0%, 100% { transform: rotate(20deg); }
+      50% { transform: rotate(-18deg); }
+    }
+    @keyframes pawWiggleAnim {
+      0%, 100% { transform: rotate(12deg); }
+      50% { transform: rotate(-12deg); }
+    }
+    @keyframes bounceCheer {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+    @keyframes benchBreatheAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    .stepping #legFront {
+      animation: legSwingFwd 0.2s infinite ease-in-out;
+      transform-origin: 8px 15px;
+    }
+    .stepping #legBack {
+      animation: legSwingBwd 0.2s infinite ease-in-out;
+      transform-origin: -13px 15px;
+    }
+    .stepping #sidePaw {
+      animation: pawWiggleAnim 0.2s infinite ease-in-out;
+      transform-origin: 2px -16px;
+    }
+    .celebrate {
+      animation: bounceCheer 0.35s 3 ease-in-out;
+    }
+    .bench-relax {
+      animation: benchBreatheAnim 2s infinite ease-in-out;
+      transform-origin: center bottom;
+    }
+
+    /* ----------------------------------------------------
+       6. Status Banner
+       ---------------------------------------------------- */
+    .status-strip {
+      background: #F0FDF4;
+      border: 1.5px solid #BBF7D0;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #166534;
+      line-height: 1.25;
+      width: 100%;
+    }
+
+    .status-icon {
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+
+    /* ----------------------------------------------------
+       7. Stage 1: Demonstration Grid
+       ---------------------------------------------------- */
+    .demo-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748B;
+      margin-bottom: 5px;
+    }
+
+    .lesson-selector {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .lesson-btn {
+      padding: 7px 8px;
+      min-height: 48px;
+      background: #F8FAFC;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 12px;
+      font-family: 'Fredoka', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .lesson-btn:active {
+      transform: scale(0.98);
+    }
+
+    .lesson-btn.active {
+      background: #EFF6FF;
+      border-color: #2563EB;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
+    }
+
+    .lesson-btn strong {
+      display: block;
+      color: #1E293B;
+      font-size: 0.8rem;
+      line-height: 1.15;
+    }
+
+    .lesson-btn.active strong {
+      color: #1D4ED8;
+    }
+
+    .lesson-btn span {
+      display: block;
+      color: #64748B;
+      font-size: 0.7rem;
+      margin-top: 2px;
+      line-height: 1.1;
+    }
+
+    /* Starting Point Control */
+    .start-control-box {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .start-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .start-stepper {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stepper-btn {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      min-height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #1E293B;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .stepper-btn:active {
+      background: #E2E8F0;
+      transform: scale(0.92);
+    }
+
+    .start-val-display {
+      font-size: 1.25rem;
+      font-weight: 800;
+      min-width: 38px;
+      text-align: center;
+      color: #2563EB;
+    }
+
+    .quick-start-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .chip-btn {
+      padding: 5px 8px;
+      min-height: 34px;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn.active {
+      background: #2563EB;
+      color: #FFFFFF;
+      border-color: #2563EB;
+    }
+
+    .chip-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Teacher Actions: Facing Direction and Walk */
+    .teacher-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .face-btn {
+      height: 44px;
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1.5px solid #CBD5E1;
+      background: #FFFFFF;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+
+    .face-btn.active {
+      background: #7C3AED;
+      color: #FFFFFF;
+      border-color: #7C3AED;
+      box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+    }
+
+    .face-btn:active {
+      transform: scale(0.95);
+    }
+
+    .walk-btn-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .primary-btn {
+      flex: 1;
+      height: 44px;
+      min-height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: #2563EB;
+      color: #FFFFFF;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .primary-btn:active {
+      background: #1D4ED8;
+      transform: scale(0.98);
+    }
+
+    .primary-btn:disabled {
+      background: #94A3B8;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .secondary-btn {
+      height: 44px;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 12px;
+      background: #F1F5F9;
+      color: #475569;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .secondary-btn:active {
+      background: #E2E8F0;
+      transform: scale(0.96);
+    }
+
+    /* ----------------------------------------------------
+       8. Stage 2: Student Game Grid (Mobile Friendly Inputs)
+       ---------------------------------------------------- */
+    .game-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #1E40AF;
+      width: 100%;
+    }
+
+    .step-workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .step-card {
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .step-card.active {
+      border-color: #2563EB;
+      background: #FFFFFF;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.08);
+    }
+
+    .step-card.done {
+      border-color: #86EFAC;
+      background: #F0FDF4;
+      opacity: 0.94;
+    }
+
+    .step-info {
+      width: 100%;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #1E293B;
+    }
+
+    .step-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #CBD5E1;
+      color: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    .step-card.active .step-badge { background: #2563EB; }
+    .step-card.done .step-badge { background: #10B981; }
+
+    .step-prompt {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #64748B;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    /* Mobile Number Input Container with iPhone [+-] & Nudge Buttons */
+    .mobile-input-cluster {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .input-main-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .math-field {
+      width: 54px;
+      height: 42px;
+      min-height: 42px;
+      padding: 2px 4px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-align: center;
+      border: 2px solid #CBD5E1;
+      border-radius: 8px;
+      outline: none;
+      font-family: 'Fredoka', sans-serif;
+      background: #FFFFFF;
+      color: #1E293B;
+    }
+
+    .math-field:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Dedicated iPhone [+-] Sign Toggle Button */
+    .toggle-sign-btn {
+      height: 42px;
+      min-height: 42px;
+      min-width: 42px;
+      padding: 0 8px;
+      border: 1.5px solid #94A3B8;
+      border-radius: 8px;
+      background: #F1F5F9;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.12s;
+    }
+
+    .toggle-sign-btn:active {
+      background: #CBD5E1;
+      transform: scale(0.92);
+    }
+
+    .nudge-btn {
+      height: 42px;
+      min-height: 42px;
+      width: 36px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      background: #FFFFFF;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nudge-btn:active {
+      background: #E2E8F0;
+      transform: scale(0.92);
+    }
+
+    .choice-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .choice-action-btn {
+      height: 42px;
+      min-height: 42px;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      background: #FFFFFF;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .choice-action-btn:active:not(:disabled) {
+      transform: scale(0.95);
+      background: #EFF6FF;
+    }
+
+    .choice-action-btn.selected {
+      background: #DBEAFE;
+      border-color: #2563EB;
+      color: #1E40AF;
+    }
+
+    .choice-action-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .small-confirm-btn {
+      flex: 1;
+      height: 42px;
+      min-height: 42px;
+      padding: 0 10px;
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .small-confirm-btn:active {
+      background: #1D4ED8;
+      transform: scale(0.96);
+    }
+
+    .quick-input-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mini-chip {
+      padding: 3px 6px;
+      height: 28px;
+      min-height: 28px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      cursor: pointer;
+    }
+
+    .mini-chip:active {
+      background: #DBEAFE;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Desktop and tablet enhancements */
+    @media (min-width: 640px) {
+      body { padding: 16px 12px 36px; }
+      .title-text { font-size: 1.7rem; }
+      .subtitle-text { font-size: 0.9rem; }
+      .card-container { padding: 16px 18px; gap: 14px; }
+      .equation-display { font-size: 2.1rem; }
+      .lesson-selector { grid-template-columns: repeat(4, 1fr); }
+      .step-workflow { display: grid; grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 860px) {
+      .step-workflow { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="title-row">
+      <span class="title-icon">🌸</span>
+      <h1 class="title-text">Chiikawa's Walking Math</h1>
+    </div>
+    <div class="subtitle-text">Mastering Positive & Negative Directed Numbers Step-by-Step</div>
+  </header>
+
+  <!-- Navigation Switcher -->
+  <div class="nav-bar">
+    <div class="mode-switch">
+      <button id="tabDemo" class="tab-btn active" onclick="switchMode(1)">🏫 Stage 1: Demo</button>
+      <button id="tabGame" class="tab-btn" onclick="switchMode(2)">🎮 Stage 2: Game</button>
+    </div>
+
+    <button id="audioToggleBtn" class="sound-btn" onclick="toggleAudio()">
+      <span id="soundIcon">🔊</span> Sound
+    </button>
+  </div>
+
+  <main class="card-container">
+
+    <!-- Math Equation Banner -->
+    <div class="equation-box">
+      <div class="eq-title">Equation on the Number Line</div>
+      <div class="equation-display">
+        <span class="num-a" id="dispA">+2</span>
+        <span class="op-symbol" id="dispOp">+</span>
+        <span class="num-b" id="dispB">(+3)</span>
+        <span class="equals">=</span>
+        <span class="num-ans" id="dispAns">?</span>
+      </div>
+    </div>
+
+    <!-- 
+      THE PURE SVG NUMBER LINE STAGE
+      Everything (Chiikawa, Bench, Markers, Number Line) is drawn inside viewBox="0 0 960 270".
+      This guarantees zero alignment drift on any phone, tablet, or smartboard.
+    -->
+    <div class="stage-wrapper">
+      <svg id="stageSvg" viewBox="0 0 960 270" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Left Arrow Marker (Pointing strictly LEFT <--) -->
+          <marker id="arrowHeadLeft" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">
+            <polygon points="7,1 1,4 7,7" fill="#64748B" />
+          </marker>
+
+          <!-- Right Arrow Marker (Pointing strictly RIGHT -->) -->
+          <marker id="arrowHeadRight" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <polygon points="1,1 7,4 1,7" fill="#64748B" />
+          </marker>
+
+          <!-- Trajectory Arc Arrow Head -->
+          <marker id="arcHead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon points="1,1 7,4 1,7" fill="#EA580C" />
+          </marker>
+        </defs>
+
+        <!-- 
+          PERMANENT WAITING BENCH (Inside SVG coordinates)
+          Positioned comfortably at x=60 to 150, y=30 to 85.
+          Chiikawa sits on top of this bench at (x=105, y=72).
+        -->
+        <g id="waitingBenchGroup" opacity="0" style="transition: opacity 0.3s ease;">
+          <!-- Bench wooden backrest & cushion -->
+          <rect x="52" y="24" width="106" height="58" rx="12" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2.5" stroke-dasharray="5,3" />
+          <!-- Bench Seat Plank -->
+          <rect x="44" y="68" width="122" height="12" rx="4" fill="#FDE68A" stroke="#D97706" stroke-width="2" />
+          <!-- Bench Legs -->
+          <line x1="56" y1="80" x2="52" y2="100" stroke="#B45309" stroke-width="3.5" stroke-linecap="round" />
+          <line x1="154" y1="80" x2="158" y2="100" stroke="#B45309" stroke-width="3.5" stroke-linecap="round" />
+          <!-- Bench Label Tag -->
+          <text x="105" y="44" font-size="12" font-weight="bold" fill="#92400E" text-anchor="middle" font-family="'Fredoka', sans-serif">🛋️ Waiting Bench</text>
+          <text x="105" y="59" font-size="10" font-weight="bold" fill="#B45309" text-anchor="middle" font-family="'Fredoka', sans-serif">Chiikawa rests here</text>
+        </g>
+
+        <!-- Movement Trajectory Arc -->
+        <path id="trajectoryPath" d="" fill="none" stroke="#EA580C" stroke-width="4" stroke-dasharray="7,5" opacity="0" />
+        <text id="trajectoryLabel" x="0" y="0" font-size="13" font-weight="bold" fill="#EA580C" text-anchor="middle" opacity="0" font-family="'Fredoka', sans-serif"></text>
+
+        <!-- Main Number Line: Left marker points Left, Right marker points Right (Y = 190) -->
+        <line id="numberLineAxis" x1="100" y1="190" x2="910" y2="190" 
+              stroke="#64748B" stroke-width="3.5" stroke-linecap="round"
+              marker-start="url(#arrowHeadLeft)" marker-end="url(#arrowHeadRight)" />
+
+        <!-- Ticks and Labels Layer -->
+        <g id="ticksLayer"></g>
+
+        <!-- Start Marker Pin on the Number Line -->
+        <g id="startMarkerGroup" opacity="0">
+          <circle id="startMarkerDot" cx="0" cy="190" r="4.5" fill="#2563EB" />
+          <line id="startMarkerStem" x1="0" y1="190" x2="0" y2="148" stroke="#2563EB" stroke-width="2" stroke-dasharray="3,2" />
+          <rect id="startMarkerTag" x="-20" y="132" width="40" height="17" rx="4" fill="#2563EB" />
+          <text id="startMarkerText" x="0" y="144" font-size="9.5" font-weight="bold" fill="#FFFFFF" text-anchor="middle" font-family="'Fredoka', sans-serif">Start</text>
+        </g>
+
+        <!-- 
+          CHIIKAWA ACTOR GROUP (Pure SVG coordinates)
+          Positioned using SVG transform="translate(x, y)"
+          Facing flipped cleanly via SVG scale(1,1) or scale(-1,1) centered on actor origin.
+        -->
+        <g id="chiikawaActorSvg" transform="translate(586, 176)">
+          <g id="chiikawaFlipGroup" transform="scale(1, 1)">
+            <!-- Fluffy Tail at back (Left side when facing right) -->
+            <circle cx="-29" cy="-8" r="9" fill="#FFFFFF" stroke="#332722" stroke-width="3.2" />
+
+            <!-- Back Foot in Profile -->
+            <g id="legBack">
+              <ellipse cx="-13" cy="15" rx="8" ry="6" fill="#F3ECE3" stroke="#332722" stroke-width="3.2" />
+            </g>
+
+            <!-- Main Chubby Body (Side profile silhouette) -->
+            <path d="M -22 -22 C -23 -46, -6 -57, 10 -57 C 24 -57, 35 -46, 35 -26 C 36 -8, 28 13, 6 13 C -14 13, -22 0, -22 -22 Z" 
+                  fill="#FFFFFF" stroke="#332722" stroke-width="3.6" />
+
+            <!-- Profile Ear with pink inside -->
+            <g transform="rotate(-6 -4 -58)">
+              <ellipse cx="-5" cy="-62" rx="8" ry="12.5" fill="#FFFFFF" stroke="#332722" stroke-width="3.2" />
+              <ellipse cx="-5" cy="-61" rx="4.5" ry="7.5" fill="#FFB8C6" />
+            </g>
+
+            <!-- Beady Eye looking forward -->
+            <circle cx="21" cy="-31" r="4.6" fill="#291F1A" />
+            <circle cx="22.5" cy="-32.5" r="1.6" fill="#FFFFFF" />
+
+            <!-- Eyebrow -->
+            <path d="M 17 -38 Q 22 -40 26 -37" fill="none" stroke="#332722" stroke-width="2" stroke-linecap="round" />
+
+            <!-- Rosy Cheek Blush -->
+            <ellipse cx="15" cy="-21" rx="6.5" ry="4" fill="#FFAEC0" opacity="0.85" />
+
+            <!-- Snout & Smile facing forward -->
+            <path d="M 27 -25 Q 32 -22.5 27 -18.5" fill="none" stroke="#332722" stroke-width="2.6" stroke-linecap="round" />
+
+            <!-- Front Arm / Paw -->
+            <g id="sidePaw">
+              <path d="M 2 -16 C 9 -16, 17 -13, 17 -7 C 17 -2, 7 -2, 2 -6 Z" fill="#FFFFFF" stroke="#332722" stroke-width="2.8" stroke-linejoin="round" />
+            </g>
+
+            <!-- Front Foot in Profile -->
+            <g id="legFront">
+              <ellipse cx="8" cy="15" rx="8" ry="6" fill="#FFFFFF" stroke="#332722" stroke-width="3.2" />
+            </g>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Live Status Strip -->
+    <div class="status-strip">
+      <span class="status-icon" id="statusIcon">💡</span>
+      <span id="statusMessage">Start at +2. Turn body or tap "Walk" to demonstrate!</span>
+    </div>
+
+    <!-- ================= STAGE 1: DEMO CONTROLS ================= -->
+    <div id="stage1Panel" class="demo-grid">
+      
+      <!-- Lesson Curriculum Selector (Operation and Step Size are locked to the Lesson) -->
+      <div>
+        <div class="section-title">1. Choose Lesson (Equation Operation & Steps Locked)</div>
+        <div class="lesson-selector">
+          <button class="lesson-btn active" id="lessonBtn0" onclick="selectLesson(0)">
+            <strong>1. Add Positive</strong>
+            <span>Start + (+3)</span>
+          </button>
+          <button class="lesson-btn" id="lessonBtn1" onclick="selectLesson(1)">
+            <strong>2. Add Negative</strong>
+            <span>Start + (−4)</span>
+          </button>
+          <button class="lesson-btn" id="lessonBtn2" onclick="selectLesson(2)">
+            <strong>3. Subtract Positive</strong>
+            <span>Start − (+5)</span>
+          </button>
+          <button class="lesson-btn" id="lessonBtn3" onclick="selectLesson(3)">
+            <strong>4. Subtract Negative</strong>
+            <span>Start − (−4)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Starting Point Stepper & Quick Jump Chips -->
+      <div class="start-control-box">
+        <div class="section-title">2. Change Starting Point (Chiikawa moves immediately)</div>
+        <div class="start-row">
+          <div class="start-stepper">
+            <button class="stepper-btn" onclick="adjustDemoStart(-1)" title="Move Start Left">−</button>
+            <span class="start-val-display" id="demoStartDisplay">+2</span>
+            <button class="stepper-btn" onclick="adjustDemoStart(1)" title="Move Start Right">+</button>
+          </div>
+
+          <div class="quick-start-chips">
+            <button class="chip-btn" onclick="setDemoStartDirect(-5)">−5</button>
+            <button class="chip-btn" onclick="setDemoStartDirect(-3)">−3</button>
+            <button class="chip-btn" onclick="setDemoStartDirect(-1)">−1</button>
+            <button class="chip-btn" onclick="setDemoStartDirect(0)">0</button>
+            <button class="chip-btn active" id="chipVal2" onclick="setDemoStartDirect(2)">+2</button>
+            <button class="chip-btn" onclick="setDemoStartDirect(3)">+3</button>
+            <button class="chip-btn" onclick="setDemoStartDirect(5)">+5</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turn Body Controls -->
+      <div>
+        <div class="section-title">3. Turn Body (Immediate Turn in Place)</div>
+        <div class="teacher-actions">
+          <button class="face-btn active" id="btnTeacherFaceR" onclick="teacherSetFacing('right')">
+            <span>👉</span> Face Right (+)
+          </button>
+          <button class="face-btn" id="btnTeacherFaceL" onclick="teacherSetFacing('left')">
+            <span>👈</span> Face Left (−)
+          </button>
+        </div>
+      </div>
+
+      <!-- Walk & Reset Action Buttons -->
+      <div class="walk-btn-row">
+        <button class="primary-btn" id="btnTeacherWalk" onclick="teacherPerformWalk()">
+          <span>🚶‍♂️</span> Walk & Solve!
+        </button>
+        <button class="secondary-btn" onclick="resetDemoToStart()">
+          ↺ Reset
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= STAGE 2: STUDENT GAME ================= -->
+    <div id="stage2Panel" class="game-grid hidden">
+      
+      <!-- Scoreboard -->
+      <div class="scoreboard">
+        <div>⭐ Stars: <span id="gameScore">0</span></div>
+        <div>🔥 Streak: <span id="gameStreak">0</span></div>
+        <button class="secondary-btn" style="height: 34px; min-height: 34px; padding: 0 10px; font-size: 0.78rem;" onclick="generateStudentRound()">
+          🎲 Next Question
+        </button>
+      </div>
+
+      <!-- 4 Progressive Steps -->
+      <div class="step-workflow">
+        
+        <!-- Step 1: Start Number Input (Chiikawa stays on bench until assessed) -->
+        <div class="step-card active" id="cardStep1">
+          <div class="step-info">
+            <div class="step-header">
+              <span class="step-badge">1</span>
+              <span>Start Number</span>
+            </div>
+            <p class="step-prompt">Where does Chiikawa start?</p>
+          </div>
+
+          <div class="mobile-input-cluster">
+            <div class="input-main-row">
+              <!-- iPhone Dedicated [+-] Toggle Button -->
+              <button class="toggle-sign-btn" onclick="toggleInputSign('inpStep1')" title="Toggle Negative Sign">±</button>
+              <button class="nudge-btn" onclick="nudgeInput('inpStep1', -1)">−</button>
+              <input type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="inpStep1" class="math-field" placeholder="0">
+              <button class="nudge-btn" onclick="nudgeInput('inpStep1', 1)">+</button>
+              <button class="small-confirm-btn" onclick="verifyStudentStep1()">Jump 🐾</button>
+            </div>
+            <!-- Quick shortcut chips for mobile taps -->
+            <div class="quick-input-chips">
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', -5)">−5</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', -3)">−3</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', -1)">−1</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', 0)">0</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', 2)">+2</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', 3)">+3</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep1', 5)">+5</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Body Orientation -->
+        <div class="step-card" id="cardStep2">
+          <div class="step-info">
+            <div class="step-header">
+              <span class="step-badge">2</span>
+              <span>Facing</span>
+            </div>
+            <p class="step-prompt">Sign is "<span id="quizOpPrompt">+</span>". Turn body:</p>
+          </div>
+          <div class="choice-pair">
+            <button class="choice-action-btn" id="btnFaceR" onclick="verifyStudentStep2('right')">👉 Right (+)</button>
+            <button class="choice-action-btn" id="btnFaceL" onclick="verifyStudentStep2('left')">👈 Left (−)</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Walking Style -->
+        <div class="step-card" id="cardStep3">
+          <div class="step-info">
+            <div class="step-header">
+              <span class="step-badge">3</span>
+              <span>Walk Style</span>
+            </div>
+            <p class="step-prompt">Steps: <span id="quizValPrompt">+3</span>. Walk:</p>
+          </div>
+          <div class="choice-pair">
+            <button class="choice-action-btn" id="btnWalkFwd" onclick="verifyStudentStep3('forward')">🚶 Forward</button>
+            <button class="choice-action-btn" id="btnWalkBwd" onclick="verifyStudentStep3('backward')">🕺 Moonwalk</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Final Landing Destination -->
+        <div class="step-card" id="cardStep4">
+          <div class="step-info">
+            <div class="step-header">
+              <span class="step-badge">4</span>
+              <span>Final Spot</span>
+            </div>
+            <p class="step-prompt">Where does Chiikawa land?</p>
+          </div>
+
+          <div class="mobile-input-cluster">
+            <div class="input-main-row">
+              <!-- iPhone Dedicated [+-] Toggle Button -->
+              <button class="toggle-sign-btn" onclick="toggleInputSign('inpStep4')" title="Toggle Negative Sign">±</button>
+              <button class="nudge-btn" onclick="nudgeInput('inpStep4', -1)">−</button>
+              <input type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" id="inpStep4" class="math-field" placeholder="?">
+              <button class="nudge-btn" onclick="nudgeInput('inpStep4', 1)">+</button>
+              <button class="small-confirm-btn" onclick="verifyStudentStep4()">Check 🚀</button>
+            </div>
+            <!-- Quick shortcut chips for mobile taps -->
+            <div class="quick-input-chips">
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', -6)">−6</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', -4)">−4</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', -1)">−1</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', 0)">0</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', 1)">+1</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', 5)">+5</button>
+              <button class="mini-chip" onclick="quickFillInput('inpStep4', 7)">+7</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // ----------------------------------------------------
+    // Application State Management
+    // ----------------------------------------------------
+    let activeStage = 1;
+    let audioOn = true;
+
+    // Stage 1 Curriculum Lessons: Locked operations and step sizes
+    const LESSONS = [
+      { id: 0, title: "1. Add Positive", op: "+", b: 3, rule: "Plus (+) faces Right. Walk Forward 3 steps." },
+      { id: 1, title: "2. Add Negative", op: "+", b: -4, rule: "Plus (+) faces Right. Moonwalk Backward 4 steps." },
+      { id: 2, title: "3. Subtract Positive", op: "-", b: 5, rule: "Minus (−) faces Left. Walk Forward 5 steps." },
+      { id: 3, title: "4. Subtract Negative", op: "-", b: -4, rule: "Minus (−) faces Left. Moonwalk Backward 4 steps." }
+    ];
+
+    let currentLessonIndex = 0;
+    let demoStartVal = 2; // Teacher starting point
+    let demoFacingRight = true;
+    let isDemoWalking = false;
+
+    // Stage 2 Student Challenge State
+    let quizNumA = 2;
+    let quizOperator = '+';
+    let quizNumB = 3;
+    let quizSubStep = 1;
+    let userScore = 0;
+    let userStreak = 0;
+
+    // ----------------------------------------------------
+    // SVG Coordinate System (viewBox 0 0 960 270)
+    // ----------------------------------------------------
+    const AXIS_MIN = -10;
+    const AXIS_MAX = 10;
+    const TOTAL_INTERVALS = AXIS_MAX - AXIS_MIN; // 20 units
+    const AXIS_X1 = 110;
+    const AXIS_X2 = 890;
+    const AXIS_Y = 190;
+    const CHIIKAWA_LINE_Y = 176;
+
+    // Bench sitting coordinates in SVG coordinates
+    const BENCH_SIT_X = 105;
+    const BENCH_SIT_Y = 66;
+
+    // Web Audio Synthesizer
+    let audioContext = null;
+
+    function playSound(type) {
+      if (!audioOn) return;
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        const now = audioContext.currentTime;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        if (type === 'jump') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.16);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+          osc.start(now);
+          osc.stop(now + 0.16);
+        } else if (type === 'turn') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(360, now);
+          osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'step') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(260 + Math.random() * 40, now);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        } else if (type === 'oops') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.22);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        }
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioOn = !audioOn;
+      const soundIcon = document.getElementById('soundIcon');
+      soundIcon.textContent = audioOn ? '🔊' : '🔇';
+      document.getElementById('audioToggleBtn').innerHTML = `<span id="soundIcon">${audioOn ? '🔊' : '🔇'}</span> Sound`;
+    }
+
+    // Number line coordinate mapping
+    function coordToX(val) {
+      const clamped = Math.max(AXIS_MIN, Math.min(AXIS_MAX, val));
+      const ratio = (clamped - AXIS_MIN) / TOTAL_INTERVALS;
+      return AXIS_X1 + ratio * (AXIS_X2 - AXIS_X1);
+    }
+
+    function renderNumberLine() {
+      const axisLine = document.getElementById('numberLineAxis');
+      axisLine.setAttribute('x1', AXIS_X1);
+      axisLine.setAttribute('x2', AXIS_X2);
+
+      const ticksGroup = document.getElementById('ticksLayer');
+      ticksGroup.innerHTML = '';
+
+      for (let n = AXIS_MIN; n <= AXIS_MAX; n++) {
+        const x = coordToX(n);
+        const isZero = (n === 0);
+        const isMajor = (n % 5 === 0);
+
+        // Tick mark line
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', x);
+        tick.setAttribute('x2', x);
+        tick.setAttribute('y1', isZero ? AXIS_Y - 14 : (isMajor ? AXIS_Y - 10 : AXIS_Y - 6));
+        tick.setAttribute('y2', isZero ? AXIS_Y + 14 : (isMajor ? AXIS_Y + 10 : AXIS_Y + 6));
+        tick.setAttribute('stroke', isZero ? '#EF4444' : (isMajor ? '#334155' : '#94A3B8'));
+        tick.setAttribute('stroke-width', isZero ? '3' : (isMajor ? '2' : '1.2'));
+        ticksGroup.appendChild(tick);
+
+        // Tick number label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', AXIS_Y + 26);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-family', 'Fredoka, sans-serif');
+        text.setAttribute('font-size', isZero ? '13' : (isMajor ? '11.5' : '10'));
+        text.setAttribute('font-weight', isZero || isMajor ? 'bold' : '600');
+        text.setAttribute('fill', isZero ? '#EF4444' : (n < 0 ? '#64748B' : '#334155'));
+        text.textContent = (n > 0 ? `+${n}` : `${n}`);
+        ticksGroup.appendChild(text);
+      }
+    }
+
+    function setCharacterPosition(svgX, svgY, facingRight) {
+      const actorSvg = document.getElementById('chiikawaActorSvg');
+      const flipGroup = document.getElementById('chiikawaFlipGroup');
+      actorSvg.setAttribute('transform', `translate(${svgX}, ${svgY})`);
+      flipGroup.setAttribute('transform', facingRight ? 'scale(1, 1)' : 'scale(-1, 1)');
+    }
+
+    function setStartMarker(val, visible = true) {
+      const group = document.getElementById('startMarkerGroup');
+      if (!visible) {
+        group.setAttribute('opacity', '0');
+        return;
+      }
+      const x = coordToX(val);
+      group.setAttribute('transform', `translate(${x}, 0)`);
+      document.getElementById('startMarkerText').textContent = `${val >= 0 ? '+' + val : val}`;
+      group.setAttribute('opacity', '1');
+    }
+
+    function drawJumpArc(fromVal, toVal) {
+      const x1 = coordToX(fromVal);
+      const x2 = coordToX(toVal);
+      const midX = (x1 + x2) / 2;
+      const height = Math.min(55, Math.max(25, Math.abs(x2 - x1) * 0.22));
+      const peakY = AXIS_Y - 15 - height;
+
+      const path = document.getElementById('trajectoryPath');
+      path.setAttribute('d', `M ${x1} ${AXIS_Y - 10} Q ${midX} ${peakY} ${x2} ${AXIS_Y - 10}`);
+      path.setAttribute('marker-end', 'url(#arcHead)');
+      path.setAttribute('opacity', '1');
+
+      const label = document.getElementById('trajectoryLabel');
+      label.setAttribute('x', midX);
+      label.setAttribute('y', peakY - 6);
+      const diff = toVal - fromVal;
+      label.textContent = `${diff >= 0 ? '+' + diff : diff}`;
+      label.setAttribute('opacity', '1');
+    }
+
+    function hideTrajectoryArc() {
+      document.getElementById('trajectoryPath').setAttribute('opacity', '0');
+      document.getElementById('trajectoryLabel').setAttribute('opacity', '0');
+    }
+
+    function animateWalkMotion(fromVal, toVal, isFacingRight, onDone) {
+      const actor = document.getElementById('chiikawaActorSvg');
+      actor.classList.add('stepping');
+
+      const xStart = coordToX(fromVal);
+      const xEnd = coordToX(toVal);
+      const duration = 1200;
+      const startTime = performance.now();
+
+      drawJumpArc(fromVal, toVal);
+
+      const stepAudioTicker = setInterval(() => {
+        playSound('step');
+      }, 190);
+
+      function stepLoop(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const ease = 0.5 - Math.cos(progress * Math.PI) / 2;
+        const currentX = xStart + (xEnd - xStart) * ease;
+        const currentY = CHIIKAWA_LINE_Y - Math.sin(progress * Math.PI) * 12;
+
+        setCharacterPosition(currentX, currentY, isFacingRight);
+
+        if (progress < 1) {
+          requestAnimationFrame(stepLoop);
+        } else {
+          clearInterval(stepAudioTicker);
+          actor.classList.remove('stepping');
+          setCharacterPosition(xEnd, CHIIKAWA_LINE_Y, isFacingRight);
+          if (onDone) onDone();
+        }
+      }
+      requestAnimationFrame(stepLoop);
+    }
+
+    // ----------------------------------------------------
+    // iPhone Input Helpers ([+-] Toggle and Nudge Buttons)
+    // ----------------------------------------------------
+    function toggleInputSign(inputId) {
+      const input = document.getElementById(inputId);
+      let val = input.value.trim();
+      playSound('jump');
+
+      if (val === '' || val === '0') {
+        input.value = '-';
+        return;
+      }
+      if (val.startsWith('-')) {
+        input.value = val.substring(1);
+      } else if (val.startsWith('+')) {
+        input.value = '-' + val.substring(1);
+      } else {
+        input.value = '-' + val;
+      }
+    }
+
+    function nudgeInput(inputId, delta) {
+      const input = document.getElementById(inputId);
+      playSound('step');
+      let current = parseInt(input.value.trim(), 10);
+      if (isNaN(current)) current = 0;
+      let next = current + delta;
+      next = Math.max(-10, Math.min(10, next));
+      input.value = next.toString();
+    }
+
+    function quickFillInput(inputId, val) {
+      const input = document.getElementById(inputId);
+      playSound('jump');
+      input.value = val.toString();
+    }
+
+    // ================= STAGE 1: TEACHER DEMO LOGIC =================
+
+    function updateDemoBanner(showResult = false) {
+      const lesson = LESSONS[currentLessonIndex];
+      const startFormatted = demoStartVal >= 0 ? `+${demoStartVal}` : `${demoStartVal}`;
+      const bFormatted = lesson.b >= 0 ? `(+${lesson.b})` : `(${lesson.b})`;
+      const result = lesson.op === '+' ? (demoStartVal + lesson.b) : (demoStartVal - lesson.b);
+
+      document.getElementById('dispA').textContent = startFormatted;
+      document.getElementById('dispOp').textContent = lesson.op;
+      document.getElementById('dispB').textContent = bFormatted;
+      document.getElementById('dispAns').textContent = showResult ? (result >= 0 ? `+${result}` : `${result}`) : '?';
+
+      document.getElementById('demoStartDisplay').textContent = startFormatted;
+
+      // Update quick chips UI
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        const chipVal = parseInt(btn.textContent.replace('+', ''), 10);
+        btn.classList.toggle('active', chipVal === demoStartVal);
+      });
+    }
+
+    function selectLesson(idx) {
+      if (isDemoWalking) return;
+      currentLessonIndex = idx;
+      const lesson = LESSONS[idx];
+
+      // Update lesson buttons UI
+      LESSONS.forEach(l => {
+        const btn = document.getElementById(`lessonBtn${l.id}`);
+        btn.classList.toggle('active', l.id === idx);
+      });
+
+      // Default facing matching the operation (+ right, - left)
+      demoFacingRight = (lesson.op === '+');
+      updateTeacherFacingButtons();
+
+      resetDemoToStart();
+      document.getElementById('statusIcon').textContent = '📖';
+      document.getElementById('statusMessage').innerHTML = `<b>Lesson Loaded:</b> Start at ${demoStartVal >= 0 ? '+' + demoStartVal : demoStartVal}. ${lesson.rule}`;
+    }
+
+    function adjustDemoStart(delta) {
+      if (isDemoWalking) return;
+      const newStart = Math.max(-8, Math.min(8, demoStartVal + delta));
+      if (newStart !== demoStartVal) {
+        demoStartVal = newStart;
+        playSound('jump');
+        resetDemoToStart();
+      }
+    }
+
+    function setDemoStartDirect(val) {
+      if (isDemoWalking) return;
+      demoStartVal = val;
+      playSound('jump');
+      resetDemoToStart();
+    }
+
+    function teacherSetFacing(direction) {
+      if (isDemoWalking) return;
+      demoFacingRight = (direction === 'right');
+      playSound('turn');
+      updateTeacherFacingButtons();
+      // Instantly rotate Chiikawa on the spot
+      setCharacterPosition(coordToX(demoStartVal), CHIIKAWA_LINE_Y, demoFacingRight);
+
+      const dirText = demoFacingRight ? 'RIGHT (➔)' : 'LEFT (⬅)';
+      document.getElementById('statusIcon').textContent = demoFacingRight ? '👉' : '👈';
+      document.getElementById('statusMessage').innerHTML = `Chiikawa is now facing <b>${dirText}</b>!`;
+    }
+
+    function updateTeacherFacingButtons() {
+      const btnR = document.getElementById('btnTeacherFaceR');
+      const btnL = document.getElementById('btnTeacherFaceL');
+      btnR.classList.toggle('active', demoFacingRight);
+      btnL.classList.toggle('active', !demoFacingRight);
+    }
+
+    function resetDemoToStart() {
+      isDemoWalking = false;
+      hideTrajectoryArc();
+      const actor = document.getElementById('chiikawaActorSvg');
+      actor.classList.remove('bench-relax', 'celebrate', 'stepping');
+
+      setCharacterPosition(coordToX(demoStartVal), CHIIKAWA_LINE_Y, demoFacingRight);
+      setStartMarker(demoStartVal, true);
+      updateDemoBanner(false);
+
+      const btnWalk = document.getElementById('btnTeacherWalk');
+      btnWalk.disabled = false;
+      btnWalk.innerHTML = `<span>🚶‍♂️</span> Walk & Solve!`;
+    }
+
+    function teacherPerformWalk() {
+      if (isDemoWalking) return;
+      isDemoWalking = true;
+      const lesson = LESSONS[currentLessonIndex];
+      const result = lesson.op === '+' ? (demoStartVal + lesson.b) : (demoStartVal - lesson.b);
+
+      const btnWalk = document.getElementById('btnTeacherWalk');
+      btnWalk.disabled = true;
+
+      const isWalkingForward = (lesson.b >= 0);
+      const gait = isWalkingForward ? 'FORWARD' : 'BACKWARD (Moonwalk)';
+      document.getElementById('statusIcon').textContent = isWalkingForward ? '🚶‍♂️' : '🕺';
+      document.getElementById('statusMessage').innerHTML = `Walking <b>${Math.abs(lesson.b)} steps ${gait}</b>!`;
+
+      animateWalkMotion(demoStartVal, result, demoFacingRight, () => {
+        isDemoWalking = false;
+        updateDemoBanner(true);
+        playSound('success');
+
+        const actor = document.getElementById('chiikawaActorSvg');
+        actor.classList.add('celebrate');
+        setTimeout(() => actor.classList.remove('celebrate'), 1100);
+
+        document.getElementById('statusIcon').textContent = '🎉';
+        document.getElementById('statusMessage').innerHTML = `<b>Arrived!</b> ${demoStartVal} ${lesson.op} (${lesson.b >= 0 ? '+' + lesson.b : lesson.b}) = <b>${result >= 0 ? '+' + result : result}</b>!`;
+        btnWalk.disabled = false;
+        btnWalk.innerHTML = `<span>✔</span> Re-Walk`;
+      });
+    }
+
+    // ================= STAGE 2: STUDENT CHALLENGE =================
+
+    function generateStudentRound() {
+      // Pick integers from -5 to +5 for clean phone layout
+      quizNumA = Math.floor(Math.random() * 9) - 4; // -4 to +4
+      quizOperator = Math.random() > 0.5 ? '+' : '-';
+      quizNumB = Math.floor(Math.random() * 9) - 4; // -4 to +4
+      if (quizNumB === 0) quizNumB = 3;
+
+      document.getElementById('dispA').textContent = (quizNumA >= 0 ? '+' + quizNumA : quizNumA);
+      document.getElementById('dispOp').textContent = quizOperator;
+      document.getElementById('dispB').textContent = `(${quizNumB >= 0 ? '+' + quizNumB : quizNumB})`;
+      document.getElementById('dispAns').textContent = '?';
+
+      document.getElementById('quizOpPrompt').textContent = quizOperator;
+      document.getElementById('quizValPrompt').textContent = (quizNumB >= 0 ? '+' + quizNumB : quizNumB);
+
+      quizSubStep = 1;
+      document.getElementById('inpStep1').value = '';
+      document.getElementById('inpStep4').value = '';
+
+      for (let i = 1; i <= 4; i++) {
+        const card = document.getElementById(`cardStep${i}`);
+        card.className = 'step-card' + (i === 1 ? ' active' : '');
+      }
+
+      document.querySelectorAll('.choice-action-btn').forEach(b => {
+        b.classList.remove('selected');
+        b.disabled = false;
+      });
+
+      hideTrajectoryArc();
+      setStartMarker(0, false);
+
+      // Chiikawa sits directly on the bench inside SVG coordinates!
+      const actor = document.getElementById('chiikawaActorSvg');
+      actor.classList.remove('stepping', 'celebrate');
+      actor.classList.add('bench-relax');
+      setCharacterPosition(BENCH_SIT_X, BENCH_SIT_Y, true);
+
+      document.getElementById('statusIcon').textContent = '🛋️';
+      document.getElementById('statusMessage').innerHTML = `<b>Student Challenge:</b> Chiikawa is resting on the bench. Type the starting number to call Chiikawa onto the line!`;
+    }
+
+    function verifyStudentStep1() {
+      const raw = document.getElementById('inpStep1').value.trim();
+      if (raw === '' || raw === '-') return;
+      const userVal = parseInt(raw, 10);
+
+      if (userVal === quizNumA) {
+        playSound('jump');
+        const actor = document.getElementById('chiikawaActorSvg');
+        actor.classList.remove('bench-relax');
+        
+        // Chiikawa hops onto the number line for the first time!
+        setCharacterPosition(coordToX(quizNumA), CHIIKAWA_LINE_Y, true);
+        setStartMarker(quizNumA, true);
+
+        document.getElementById('cardStep1').className = 'step-card done';
+        document.getElementById('cardStep2').className = 'step-card active';
+        quizSubStep = 2;
+
+        document.getElementById('statusIcon').textContent = '🐾';
+        document.getElementById('statusMessage').innerHTML = `<b>Great start!</b> Chiikawa landed on <b>${quizNumA >= 0 ? '+' + quizNumA : quizNumA}</b>. Which way should Chiikawa face?`;
+      } else {
+        playSound('oops');
+        document.getElementById('statusIcon').textContent = '🤔';
+        document.getElementById('statusMessage').innerHTML = `Look closely at the first number: <b>${quizNumA >= 0 ? '+' + quizNumA : quizNumA}</b>. Try again!`;
+      }
+    }
+
+    function verifyStudentStep2(choice) {
+      if (quizSubStep !== 2) return;
+      const expected = (quizOperator === '+') ? 'right' : 'left';
+      const isRight = (choice === 'right');
+
+      // Chiikawa immediately turns on the spot
+      setCharacterPosition(coordToX(quizNumA), CHIIKAWA_LINE_Y, isRight);
+
+      if (choice === expected) {
+        playSound('turn');
+        document.getElementById(isRight ? 'btnFaceR' : 'btnFaceL').classList.add('selected');
+        document.getElementById('cardStep2').className = 'step-card done';
+        document.getElementById('cardStep3').className = 'step-card active';
+        quizSubStep = 3;
+
+        document.getElementById('statusIcon').textContent = '✨';
+        document.getElementById('statusMessage').innerHTML = `<b>Correct!</b> Operation is "<b>${quizOperator}</b>" so face <b>${isRight ? 'RIGHT (➔)' : 'LEFT (⬅)'}</b>. How should Chiikawa walk?`;
+      } else {
+        playSound('oops');
+        document.getElementById('statusIcon').textContent = '❌';
+        document.getElementById('statusMessage').innerHTML = `Remember: <b>Plus (+)</b> faces Right ➔, and <b>Minus (−)</b> faces Left ⬅!`;
+      }
+    }
+
+    function verifyStudentStep3(choice) {
+      if (quizSubStep !== 3) return;
+      const expected = (quizNumB >= 0) ? 'forward' : 'backward';
+
+      if (choice === expected) {
+        playSound('turn');
+        document.getElementById(choice === 'forward' ? 'btnWalkFwd' : 'btnWalkBwd').classList.add('selected');
+        document.getElementById('cardStep3').className = 'step-card done';
+        document.getElementById('cardStep4').className = 'step-card active';
+        quizSubStep = 4;
+
+        document.getElementById('statusIcon').textContent = '🎯';
+        document.getElementById('statusMessage').innerHTML = `<b>Spot on!</b> The step number is <b>${quizNumB >= 0 ? '+' + quizNumB : quizNumB}</b>, so walk <b>${choice.toUpperCase()}</b>. Where will it land?`;
+      } else {
+        playSound('oops');
+        document.getElementById('statusIcon').textContent = '❌';
+        document.getElementById('statusMessage').innerHTML = `Positive numbers walk forward. Negative numbers moonwalk backward!`;
+      }
+    }
+
+    function verifyStudentStep4() {
+      if (quizSubStep !== 4) return;
+      const raw = document.getElementById('inpStep4').value.trim();
+      if (raw === '' || raw === '-') return;
+
+      const userAns = parseInt(raw, 10);
+      const correctAns = quizOperator === '+' ? (quizNumA + quizNumB) : (quizNumA - quizNumB);
+      const isFacingRight = (quizOperator === '+');
+
+      if (userAns === correctAns) {
+        animateWalkMotion(quizNumA, correctAns, isFacingRight, () => {
+          playSound('success');
+          userScore += 10;
+          userStreak += 1;
+          document.getElementById('gameScore').textContent = userScore;
+          document.getElementById('gameStreak').textContent = userStreak;
+
+          document.getElementById('cardStep4').className = 'step-card done';
+          document.getElementById('dispAns').textContent = (correctAns >= 0 ? '+' + correctAns : correctAns);
+
+          const actor = document.getElementById('chiikawaActorSvg');
+          actor.classList.add('celebrate');
+          setTimeout(() => actor.classList.remove('celebrate'), 1100);
+
+          document.getElementById('statusIcon').textContent = '🏆';
+          document.getElementById('statusMessage').innerHTML = `🎉 <b>Awesome job!</b> Landed at <b>${correctAns >= 0 ? '+' + correctAns : correctAns}</b>! Tap "Next Question" to keep your streak!`;
+        });
+      } else {
+        playSound('oops');
+        userStreak = 0;
+        document.getElementById('gameStreak').textContent = userStreak;
+        document.getElementById('statusIcon').textContent = '💡';
+        document.getElementById('statusMessage').innerHTML = `Not quite! Count ${Math.abs(quizNumB)} steps from ${quizNumA} in that direction.`;
+      }
+    }
+
+    // Mode Switcher
+    function switchMode(stageNum) {
+      activeStage = stageNum;
+      document.getElementById('tabDemo').classList.toggle('active', stageNum === 1);
+      document.getElementById('tabGame').classList.toggle('active', stageNum === 2);
+
+      const benchGroup = document.getElementById('waitingBenchGroup');
+
+      if (stageNum === 1) {
+        document.getElementById('stage1Panel').classList.remove('hidden');
+        document.getElementById('stage2Panel').classList.add('hidden');
+        benchGroup.setAttribute('opacity', '0');
+        renderNumberLine();
+        selectLesson(currentLessonIndex);
+      } else {
+        document.getElementById('stage1Panel').classList.add('hidden');
+        document.getElementById('stage2Panel').classList.remove('hidden');
+        benchGroup.setAttribute('opacity', '1');
+        renderNumberLine();
+        generateStudentRound();
+      }
+    }
+
+    // Keyboard support: Press Enter to submit
+    document.getElementById('inpStep1').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyStudentStep1();
+    });
+    document.getElementById('inpStep4').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyStudentStep4();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderNumberLine();
+      selectLesson(0);
+    });
+  </script>
+</body>
+</html>
